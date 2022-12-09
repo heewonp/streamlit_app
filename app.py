@@ -83,6 +83,13 @@ if si_select == '서귀포시':
 else:
     si_2 = df_card[df_card['시군구명']=='제주시'].groupby(['상호명'])[['제주도민매출금액비율','제주도민매출수비율','외지인매출금액비율','외지인매출수비율','전체매출금액비율','전체매출수비율']].sum()
     st.dataframe(si_2)
+    
+    
+st.subheader('읍면동별')
+st.sidebar.header('지역선택')
+dong_select = st.sidebar.multiselect('읍면동선택', df_card['행정동명'].unique())
+dong = df_card[df_card['행정동명'].isin(dong_select)].groupby(['상호명','행정동명'])[['제주도민매출금액비율','제주도민매출수비율','외지인매출금액비율','외지인매출수비율','전체매출금액비율','전체매출수비율']].sum()
+st.dataframe(dong)
 
 
 st.header('2.상담키워드')
@@ -134,3 +141,38 @@ else:
                             font = {'color':'#393E46'} # 전체 글자(폰트) 색상
                         ),width=1000)
     st.plotly_chart(fig)
+    
+    
+
+
+st.sidebar.header('상담 음식 키워드별 식당')
+keyword = ['향토음식','한식','카페','일식','동남아']
+keyword_select = st.sidebar.multiselect('키워드선택', keyword)
+keyword_food = df_place2[df_place2['가게명'].isin(keyword_select)][['가게명','주소','점수','찜','음식 분야','해시태그']]
+st.table(keyword_food)
+
+
+st.sidebar.header('상담 음식 키워드별 식당리뷰')
+keyword_select = st.sidebar.multiselect('키워드선택', keyword[:3])
+col1, col2 = st.sidebar.columns(2)
+if keyword_select =='향토음식':
+    with col1: 
+        colors = ["#F7A4A4"] * 20
+        fig = go.Figure(data=[go.Bar(x = cnt_food['형태소'], y=cnt_food['빈도수'],marker_color = colors)])
+        fig.update_layout(go.Layout(title={'text':'향토음식 리뷰 키워드', 
+                                    'font':{'color':'#393E46', 'size':30}}, # 타이틀
+                                xaxis={'title': {'text': '키워드'}, # x축 라벨 추가, 그리드 숨김
+                                    'gridwidth':1, 'showgrid':False},
+                                yaxis={'title': {'text': '빈도수'}, # y축 라벨 추가
+                                    'gridwidth':1}, # grid line style은 바꿀수 없다.
+                                legend ={'borderwidth':2, # 범례 테두리 두께
+                                        'bordercolor':'black', # 범례 테두리 색
+                                        'bgcolor':'#faf7af', # 범례 배경색
+                                        'font':{'color':'black'} # 범례 글자 색
+                                        },
+                                plot_bgcolor='white', # 차트 안쪽 배경색
+                                font = {'color':'#393E46'} # 전체 글자(폰트) 색상
+                            ),width=1000)
+        st.plotly_chart(fig)
+    with col2:
+        st.image('data/food.png', use_column_width=True)
